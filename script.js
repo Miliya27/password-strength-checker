@@ -1,43 +1,50 @@
-/**
- * PASSWORD CHECKER & GENERATOR
- * Portfolio Project: HTML/CSS/JS
- */
 
-// --- 1. ELEMENT SELECTIONS ---
-const password = document.getElementById('password');
+const commonPasswords = [
+    '12345678', 'password', 'password123', 'qwertyuiop', 
+    'admin123', 'welcome1', 'letmein123', 'iloveyou'
+];
+
+
+const passwordInput = document.getElementById('password');
 const toggleBtn = document.getElementById('toggleBtn');
 const strengthBar = document.getElementById('strength-bar');
 const strengthText = document.querySelector('#strength-text span');
+const warningText = document.getElementById('blacklist-warning');
 
 const generateBtn = document.getElementById('generateBtn');
 const copyBtn = document.getElementById('copyBtn');
 const generatedPassDisplay = document.getElementById('generatedPassDisplay');
 
-// --- 2. PASSWORD STRENGTH CHECKER ---
+
 
 // Toggle visibility (Show/Hide)
 toggleBtn.addEventListener('click', () => {
-    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-    password.setAttribute('type', type);
-    toggleBtn.textContent = type === 'password' ? 'Show' : 'Hide';
+    const isPass = passwordInput.getAttribute('type') === 'password';
+    passwordInput.setAttribute('type', isPass ? 'text' : 'password');
+    toggleBtn.textContent = isPass ? 'Hide' : 'Show';
 });
 
 // Real-time Validation
-password.addEventListener('input', () => {
-    const val = password.value;
+passwordInput.addEventListener('input', () => {
+    const val = passwordInput.value;
+    const lowerVal = val.toLowerCase();
     let score = 0;
 
-    // Requirements logic using Regex
-    const requirements = [
+    // Check against blacklist
+    const isBlacklisted = commonPasswords.includes(lowerVal);
+
+    // Criteria Mapping
+    const criteria = [
         { id: 'len',  met: val.length >= 8 },
         { id: 'up',   met: /[A-Z]/.test(val) },
         { id: 'num',  met: /[0-9]/.test(val) },
         { id: 'spec', met: /[!@#$%^&*]/.test(val) }
     ];
 
-    requirements.forEach(req => {
-        const element = document.getElementById(req.id);
-        if (req.met) {
+    
+    criteria.forEach(item => {
+        const element = document.getElementById(item.id);
+        if (item.met && !isBlacklisted) {
             element.classList.replace('invalid', 'valid');
             score++;
         } else {
@@ -45,10 +52,16 @@ password.addEventListener('input', () => {
         }
     });
 
-    updateUI(score);
+    // Handle Blacklist Warning Visibility
+    if (isBlacklisted) {
+        warningText.style.display = 'block';
+        updateUI(1); // Force "Weak" status
+    } else {
+        warningText.style.display = 'none';
+        updateUI(val === "" ? 0 : score);
+    }
 });
 
-// Update Strength Bar Colors and Text
 function updateUI(score) {
     const states = [
         { color: '#ddd', width: '0%', text: 'None' },
@@ -65,39 +78,30 @@ function updateUI(score) {
     strengthText.style.color = current.color;
 }
 
-// --- 3. GENERATOR & CLIPBOARD LOGIC ---
 
-// Generate a random 16-character string
 generateBtn.addEventListener('click', () => {
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
     let newPassword = "";
     
+    // Generate 16 random characters
     for (let i = 0; i < 16; i++) {
-        const randomIndex = Math.floor(Math.random() * charset.length);
-        newPassword += charset[randomIndex];
+        newPassword += charset.charAt(Math.floor(Math.random() * charset.length));
     }
     
-    // Display in UI
     generatedPassDisplay.textContent = newPassword;
     
-    // Fill the input and trigger the 'input' event to update the checker bar
-    password.value = newPassword;
-    password.dispatchEvent(new Event('input'));
+    // Fill the checker automatically
+    passwordInput.value = newPassword;
+    passwordInput.dispatchEvent(new Event('input'));
 });
 
-// Copy to Clipboard with Feedback
 copyBtn.addEventListener('click', () => {
-    const textToCopy = generatedPassDisplay.textContent;
-    
-    if (textToCopy === "—— —— ——" || textToCopy === "") return;
+    const text = generatedPassDisplay.textContent;
+    if (text === "—— —— ——" || text === "") return;
 
-    navigator.clipboard.writeText(textToCopy).then(() => {
+    navigator.clipboard.writeText(text).then(() => {
         const originalIcon = copyBtn.textContent;
-        copyBtn.textContent = "✅"; // Show success checkmark
-        
-        // Reset icon after 2 seconds
-        setTimeout(() => {
-            copyBtn.textContent = originalIcon;
-        }, 2000);
+        copyBtn.textContent = "✅";
+        setTimeout(() => copyBtn.textContent = originalIcon, 2000);
     });
 });
