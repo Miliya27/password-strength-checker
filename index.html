@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Password Checker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card">
+        <h2>Password Strength</h2>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Enter your password">
+            <button id="toggleBtn">Show</button>
+        </div>
+
+        <div class="meter-container">
+            <div id="strength-bar"></div>
+        </div>
+        <p id="strength-text">Strength: <span>Weak</span></p>
+
+        <ul class="checklist">
+            <li id="len" class="invalid">8+ Characters</li>
+            <li id="up" class="invalid">Uppercase Letter</li>
+            <li id="num" class="invalid">A Number</li>
+            <li id="spec" class="invalid">Special Character (@$!%*?)</li>
+        </ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
